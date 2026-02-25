@@ -88,3 +88,47 @@ DELETE FROM inventory.customers
 WHERE email='cdc.updated@example.com';
 "
 ```
+
+# Working with Polaris
+```bash
+# Get a valid access token
+TOKEN=$(curl -s -X POST http://localhost:8181/api/catalog/v1/oauth/tokens \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d "grant_type=client_credentials&client_id=root&client_secret=s3cr3t&scope=PRINCIPAL_ROLE:ALL" \
+  | jq -r '.access_token')
+
+# Create the bronze catalog
+curl -sS -X POST "http://localhost:8181/api/management/v1/catalogs" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Polaris-Realm: POLARIS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "catalog": {
+        "name": "bronze",
+        "type": "INTERNAL",
+        "readOnly": false,
+        "properties": {
+            "default-base-location": "s3://bronze"
+        },
+        "storageConfigInfo": {
+            "storageType": "S3",
+            "allowedLocations": ["s3://bronze"],
+            "endpoint": "http://localhost:9000",
+            "endpointInternal": "http://minio:9000",
+            "pathStyleAccess": true
+        }
+    }
+  }' | jq
+
+# List catalogs
+curl -s http://localhost:8181/api/management/v1/catalogs \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Polaris-Realm: POLARIS" | jq
+
+# Delete catalog
+curl -sS -X DELETE "http://localhost:8181/api/management/v1/catalogs/bronze" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Polaris-Realm: POLARIS" \
+  -H "Content-Type: application/json" \
+  | jq  
+```
