@@ -132,3 +132,28 @@ curl -sS -X DELETE "http://localhost:8181/api/management/v1/catalogs/bronze" \
   -H "Content-Type: application/json" \
   | jq  
 ```
+
+# Spark submit
+```bash
+AWS_ACCESS_KEY_ID=minioadmin \
+AWS_SECRET_ACCESS_KEY=minioadmin \
+AWS_REGION=us-east-1 \
+SPARK_LOCAL_IP=127.0.0.1 SPARK_LOCAL_HOSTNAME=localhost \
+spark-submit --master "local[2]" \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.0,org.apache.iceberg:iceberg-aws-bundle:1.10.0 \
+  --conf spark.driver.bindAddress=127.0.0.1 \
+  --conf spark.driver.host=localhost \
+  --conf spark.ui.host=127.0.0.1 \
+  --conf spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions \
+  --conf spark.sql.catalog.bronze=org.apache.iceberg.spark.SparkCatalog \
+  --conf spark.sql.catalog.bronze.type=rest \
+  --conf spark.sql.catalog.bronze.warehouse=s3a://bronze/ \
+  --conf spark.sql.catalog.bronze.io-impl=org.apache.iceberg.aws.s3.S3FileIO \
+  --conf spark.sql.catalog.bronze.s3.endpoint=http://localhost:9000 \
+  --conf spark.sql.catalog.bronze.s3.path-style-access=true \
+  --conf spark.sql.catalog.bronze.s3.access-key-id=minioadmin \
+  --conf spark.sql.catalog.bronze.s3.secret-access-key=minioadmin \
+  --conf spark.sql.catalog.bronze.s3.region=us-east-1 \
+  --conf spark.sql.catalog.bronze.uri=http://localhost:8183 \
+  demo_iceberg_scd1_local.py
+```  

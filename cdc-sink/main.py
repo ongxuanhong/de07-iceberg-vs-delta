@@ -87,8 +87,6 @@ class MyDatabaseSink(BatchingSink):
     @staticmethod
     def _normalize_record(record: Any) -> dict[str, Any]:
         if isinstance(record, dict):
-            if "after" in record and isinstance(record["after"], dict):
-                return record["after"]
             return record
         return {"value": record}
 
@@ -135,7 +133,10 @@ def main() -> None:
         auto_offset_reset="earliest",
     )
     my_db_sink = MyDatabaseSink()
-    input_topic = app.topic(name=os.environ["input"])
+    input_topic_name = os.environ["input"]
+    print(f"Subscribing to topic: {input_topic_name}")
+    
+    input_topic = app.topic(name=input_topic_name)
     sdf = app.dataframe(topic=input_topic)
     sdf = sdf.apply(lambda row: row).print(metadata=True)
     sdf.sink(my_db_sink)
