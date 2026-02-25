@@ -8,3 +8,5 @@ pyarrow==23.0.1
 pyiceberg[s3fs]
 pyiceberg[sql-postgres]
 pyiceberg[sql-sqlite]
+
+deltalake==1.4.2
