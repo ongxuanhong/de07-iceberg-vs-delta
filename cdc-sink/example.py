@@ -23,7 +23,7 @@ catalog = load_catalog(
         "s3.access-key-id": "minioadmin",
         "s3.secret-access-key": "minioadmin",
         "s3.path-style-access": "true",
-    }
+    },
 )
 
 # Quick connectivity test
@@ -37,7 +37,7 @@ data = [
         "user_id": "u78912",
         "action": "click",
         "page": "/products/iceberg-book",
-        "value": 29.99
+        "value": 29.99,
     },
     {
         "id": 1002,
@@ -45,19 +45,21 @@ data = [
         "user_id": "u12345",
         "action": "purchase",
         "page": None,
-        "value": 149.00
+        "value": 149.00,
     },
 ]
 
 # Use explicit Arrow schema for consistency
-arrow_schema = pa.schema([
-    ("id",         pa.int32()),
-    ("event_time", pa.timestamp("us")),   # no tz
-    ("user_id",    pa.string()),
-    ("action",     pa.string()),
-    ("page",       pa.string()),
-    ("value",      pa.float64()),
-])
+arrow_schema = pa.schema(
+    [
+        ("id", pa.int32()),
+        ("event_time", pa.timestamp("us")),  # no tz
+        ("user_id", pa.string()),
+        ("action", pa.string()),
+        ("page", pa.string()),
+        ("value", pa.float64()),
+    ]
+)
 
 arrow_table = pa.Table.from_pylist(data, schema=arrow_schema)
 
@@ -72,12 +74,12 @@ print(f"Namespace '{namespace}' ready")
 
 # Iceberg schema (matches Arrow schema)
 iceberg_schema = IcebergSchema(
-    NestedField(1, "id",        IntegerType(), required=False),
+    NestedField(1, "id", IntegerType(), required=False),
     NestedField(2, "event_time", TimestamptzType(), required=False),
-    NestedField(3, "user_id",   StringType(), required=False),
-    NestedField(4, "action",    StringType(), required=False),
-    NestedField(5, "page",      StringType(), required=False),
-    NestedField(6, "value",     DoubleType(), required=False),
+    NestedField(3, "user_id", StringType(), required=False),
+    NestedField(4, "action", StringType(), required=False),
+    NestedField(5, "page", StringType(), required=False),
+    NestedField(6, "value", DoubleType(), required=False),
 )
 
 # Create or load table
@@ -86,10 +88,7 @@ try:
     print(f"Table {table_identifier} already exists → will append")
 except Exception:
     print(f"Creating new table {table_identifier}")
-    table = catalog.create_table(
-        identifier=table_identifier,
-        schema=iceberg_schema
-    )
+    table = catalog.create_table(identifier=table_identifier, schema=iceberg_schema)
     print(f"Table created")
 
 # Quick validation

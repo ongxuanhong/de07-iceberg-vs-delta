@@ -1,4 +1,5 @@
 quixstreams==3.23.2
+quixstreams[iceberg]
 python-dotenv==1.2.1
 numpy
 pandas
