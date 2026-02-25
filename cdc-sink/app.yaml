@@ -1,0 +1,11 @@
+name: cdc-sink
+language: Python
+variables:
+  - name: input
+    inputType: InputTopic
+    description: Name of the input topic to listen to.
+    defaultValue: postgres1.inventory.customers
+dockerfile: dockerfile
+runEntryPoint: main.py
+defaultFile: main.py
+libraryItemId: starter-destination
