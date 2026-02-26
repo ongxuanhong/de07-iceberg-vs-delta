@@ -1,0 +1,13 @@
+{
+  "catalogs": [
+    { "user": "de_.*", "catalog": "system", "allow": "read-only" },
+    { "user": "de_.*", "catalog": "bronze", "allow": "all" },
+    { "user": "de_.*", "catalog": "silver", "allow": "all" },
+
+    { "user": "ds_.*", "catalog": "system", "allow": "read-only" },
+    { "user": "ds_.*", "catalog": "silver", "allow": "read-only" },
+    { "user": "ds_.*", "catalog": "bronze", "allow": "none" },
+
+    { "catalog": ".*", "allow": "none" }
+  ]
+}
