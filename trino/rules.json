@@ -1,12 +1,11 @@
 {
   "catalogs": [
     { "user": "de_.*", "catalog": "system", "allow": "read-only" },
-    { "user": "de_.*", "catalog": "bronze", "allow": "all" },
-    { "user": "de_.*", "catalog": "silver", "allow": "all" },
+    { "user": "de_.*", "catalog": "bronze_de", "allow": "all" },
+    { "user": "de_.*", "catalog": "silver_de", "allow": "all" },
 
     { "user": "ds_.*", "catalog": "system", "allow": "read-only" },
-    { "user": "ds_.*", "catalog": "silver", "allow": "read-only" },
-    { "user": "ds_.*", "catalog": "bronze", "allow": "none" },
+    { "user": "ds_.*", "catalog": "silver_ds", "allow": "all" },
 
     { "catalog": ".*", "allow": "none" }
   ]

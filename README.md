@@ -535,7 +535,3 @@ With DS connection:
 - `SELECT * FROM silver_ds.event_streaming.polaris_smoke_test` ✅
 - `INSERT INTO silver_ds.event_streaming.polaris_smoke_test (...) VALUES (...)` ❌ (expected denied)
 - `SELECT * FROM bronze_de.inventory.customers` ❌ (if hidden by Trino rules)
-
----
-
-If you want, I can generate the exact `bronze_de.properties`, `silver_de.properties`, `silver_ds.properties` and a minimal `rules.json` for catalog visibility only, based on your current files.
