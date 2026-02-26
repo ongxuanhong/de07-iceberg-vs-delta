@@ -90,14 +90,6 @@ services:
       retries: 10
       start_period: 10s
 
-  iceberg-rest:
-    image: apache/iceberg-rest-fixture
-    container_name: iceberg-rest
-    ports:
-      - 8183:8181
-    env_file:
-      - .env.docker
-      
   cdc-sink:
     build: ./cdc-sink
     container_name: cdc-sink

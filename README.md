@@ -120,6 +120,29 @@ curl -sS -X POST "http://localhost:8181/api/management/v1/catalogs" \
     }
   }' | jq
 
+# Create the silver catalog
+curl -sS -X POST "http://localhost:8181/api/management/v1/catalogs" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Polaris-Realm: POLARIS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "catalog": {
+        "name": "silver",
+        "type": "INTERNAL",
+        "readOnly": false,
+        "properties": {
+            "default-base-location": "s3://silver"
+        },
+        "storageConfigInfo": {
+            "storageType": "S3",
+            "allowedLocations": ["s3://silver"],
+            "endpoint": "http://localhost:9000",
+            "endpointInternal": "http://minio:9000",
+            "pathStyleAccess": true
+        }
+    }
+  }' | jq  
+
 # List catalogs
 curl -s http://localhost:8181/api/management/v1/catalogs \
   -H "Authorization: Bearer $TOKEN" \
@@ -135,6 +158,7 @@ curl -sS -X DELETE "http://localhost:8181/api/management/v1/catalogs/bronze" \
 
 # Spark submit
 ```bash
+# Using REST catalog
 AWS_ACCESS_KEY_ID=minioadmin \
 AWS_SECRET_ACCESS_KEY=minioadmin \
 AWS_REGION=us-east-1 \
@@ -155,6 +179,43 @@ spark-submit --master "local[2]" \
   --conf spark.sql.catalog.bronze.s3.secret-access-key=minioadmin \
   --conf spark.sql.catalog.bronze.s3.region=us-east-1 \
   --conf spark.sql.catalog.bronze.uri=http://localhost:8183 \
-  demo_iceberg_scd1_local.py
+scripts/demo_iceberg_scd1_local.py
 
+# Using Polaris catalog
+AWS_ACCESS_KEY_ID=minioadmin \
+AWS_SECRET_ACCESS_KEY=minioadmin \
+AWS_REGION=us-east-1 \
+SPARK_LOCAL_IP=127.0.0.1 \
+SPARK_LOCAL_HOSTNAME=localhost \
+spark-submit --master "local[2]" \
+  --packages org.apache.polaris:polaris-spark-3.5_2.12:1.3.0-incubating,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.0,org.apache.iceberg:iceberg-aws-bundle:1.10.0 \
+  --conf spark.driver.bindAddress=127.0.0.1 \
+  --conf spark.driver.host=localhost \
+  --conf spark.ui.host=127.0.0.1 \
+  --conf spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions \
+  --conf spark.sql.catalog.bronze=org.apache.iceberg.spark.SparkCatalog \
+  --conf spark.sql.catalog.bronze.type=rest \
+  --conf spark.sql.catalog.bronze.uri=http://localhost:8181/api/catalog \
+  --conf spark.sql.catalog.bronze.warehouse=bronze \
+  --conf spark.sql.catalog.bronze.credential=root:s3cr3t \
+  --conf spark.sql.catalog.bronze.scope=PRINCIPAL_ROLE:ALL \
+  --conf spark.sql.catalog.bronze.io-impl=org.apache.iceberg.aws.s3.S3FileIO \
+  --conf spark.sql.catalog.bronze.s3.endpoint=http://localhost:9000 \
+  --conf spark.sql.catalog.bronze.s3.path-style-access=true \
+  --conf spark.sql.catalog.bronze.s3.access-key-id=minioadmin \
+  --conf spark.sql.catalog.bronze.s3.secret-access-key=minioadmin \
+  --conf spark.sql.catalog.bronze.client.region=us-east-1 \
+  --conf spark.sql.catalog.silver=org.apache.iceberg.spark.SparkCatalog \
+  --conf spark.sql.catalog.silver.type=rest \
+  --conf spark.sql.catalog.silver.uri=http://localhost:8181/api/catalog \
+  --conf spark.sql.catalog.silver.warehouse=silver \
+  --conf spark.sql.catalog.silver.credential=root:s3cr3t \
+  --conf spark.sql.catalog.silver.scope=PRINCIPAL_ROLE:ALL \
+  --conf spark.sql.catalog.silver.io-impl=org.apache.iceberg.aws.s3.S3FileIO \
+  --conf spark.sql.catalog.silver.s3.endpoint=http://localhost:9000 \
+  --conf spark.sql.catalog.silver.s3.path-style-access=true \
+  --conf spark.sql.catalog.silver.s3.access-key-id=minioadmin \
+  --conf spark.sql.catalog.silver.s3.secret-access-key=minioadmin \
+  --conf spark.sql.catalog.silver.client.region=us-east-1 \
+scripts/test_polaris_smoke.py
 ```  
