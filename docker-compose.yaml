@@ -98,3 +98,12 @@ services:
       - minio
     env_file:
       - .env.docker
+
+  trino:
+    container_name: trino
+    image: "trinodb/trino"
+    hostname: trino
+    ports:
+      - "8086:8080"
+    volumes:
+      - ./trino:/etc/trino      
