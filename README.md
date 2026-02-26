@@ -140,7 +140,7 @@ AWS_SECRET_ACCESS_KEY=minioadmin \
 AWS_REGION=us-east-1 \
 SPARK_LOCAL_IP=127.0.0.1 SPARK_LOCAL_HOSTNAME=localhost \
 spark-submit --master "local[2]" \
-  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.0,org.apache.iceberg:iceberg-aws-bundle:1.10.0 \
+  --packages org.apache.polaris:polaris-spark-3.5_2.12:1.3.0-incubating,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.0,org.apache.iceberg:iceberg-aws-bundle:1.10.0 \
   --conf spark.driver.bindAddress=127.0.0.1 \
   --conf spark.driver.host=localhost \
   --conf spark.ui.host=127.0.0.1 \
@@ -156,4 +156,5 @@ spark-submit --master "local[2]" \
   --conf spark.sql.catalog.bronze.s3.region=us-east-1 \
   --conf spark.sql.catalog.bronze.uri=http://localhost:8183 \
   demo_iceberg_scd1_local.py
+
 ```  

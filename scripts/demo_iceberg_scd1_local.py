@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
 from pyspark.sql.window import Window
 
-spark = SparkSession.builder.appName("Iceberg CDC Silver Demo").getOrCreate()
+spark = SparkSession.builder.appName("Iceberg CDC bronze Demo").getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
 
@@ -64,8 +64,8 @@ df_merge.show(10, truncate=False)
 
 # Target table
 table_name = "event_streaming.customers_scd1"
-target_table = f"silver.{table_name}"
-target_namespace = "silver.event_streaming"
+target_table = f"bronze.{table_name}"
+target_namespace = "bronze.event_streaming"
 
 # Create table if not exists (format-version 3 to support unknown/null structs)
 spark.sql(f"CREATE NAMESPACE IF NOT EXISTS {target_namespace}")
