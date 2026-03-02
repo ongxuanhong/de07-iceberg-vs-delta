@@ -4,3 +4,4 @@ compose.local.yaml
 .venv/
 certificates/
 .quix.yaml.variables
+charts/

@@ -1,0 +1,12 @@
+# Polaris only, no Auth0 – for local testing (e.g. Docker Desktop)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+- name: polaris
+  includeCRDs: true
+  releaseName: polaris
+  namespace: polaris-local
+  version: 1.3.0-incubating
+  repo: https://downloads.apache.org/incubator/polaris/helm-chart
+  valuesFile: values.yaml
