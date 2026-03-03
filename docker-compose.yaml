@@ -67,6 +67,10 @@ services:
       mc mb myminio/silver || true &&
       mc anonymous set public myminio/silver &&
       echo 'Bucket silver ready.'
+
+      mc mb myminio/gold || true &&
+      mc anonymous set public myminio/gold &&
+      echo 'Bucket gold ready.'
       "
 
   polaris:
