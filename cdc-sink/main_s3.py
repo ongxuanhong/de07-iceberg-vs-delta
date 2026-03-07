@@ -2,6 +2,9 @@ import os
 from quixstreams import Application
 from quixstreams.sinks.community.file.s3 import S3FileSink
 from quixstreams.sinks.community.file.formats import JSONFormat
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Parameters preparation
 broker_address = os.getenv("BROKER_ADDRESS")
