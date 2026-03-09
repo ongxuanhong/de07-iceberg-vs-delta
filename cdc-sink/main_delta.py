@@ -8,41 +8,51 @@ from deltalake import write_deltalake
 from dotenv import load_dotenv
 from quixstreams import Application
 from quixstreams.sinks import BatchingSink, SinkBackpressureError, SinkBatch
+from dotenv import load_dotenv
 
 load_dotenv()
 
+# Parameters preparation
+broker_address = os.getenv("BROKER_ADDRESS")
+consumer_group = os.getenv("CONSUMER_GROUP")
+input_topic = os.getenv("INPUT_TOPIC")
+bucket_name = os.getenv("BUCKET_NAME")
+s3_path = os.getenv("S3_PATH")
+aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+endpoint_url = os.getenv("AWS_ENDPOINT_URL_S3")
+aws_region = os.getenv("AWS_REGION")
 
+# Quix application processing
+app = Application(
+    broker_address=broker_address,
+    consumer_group=consumer_group,
+    auto_offset_reset="earliest",
+)
+topic = app.topic(input_topic)
+sdf = app.dataframe(topic)
+
+
+# Configure the sink to write Delta files to S3
 class MyDeltaSink(BatchingSink):
     """Write consumed Kafka records into a Delta table on object storage."""
 
     def __init__(self) -> None:
         super().__init__()
-        self.table_uri = os.getenv(
-            "DELTA_TABLE_URI", "s3://bronze/delta/inventory/customers"
-        )
+        self.table_uri = "s3://dev-asia-vn-bronze/event_streaming/customers"
         self.storage_options = self._create_storage_options()
 
     @staticmethod
     def _create_storage_options() -> dict[str, str]:
         options: dict[str, str] = {}
-
-        access_key = os.getenv("AWS_ACCESS_KEY_ID")
-        secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-        region = os.getenv("AWS_REGION")
-        endpoint = os.getenv("DELTA_S3_ENDPOINT") or os.getenv("ICEBERG_S3_ENDPOINT")
-        allow_http = os.getenv("DELTA_AWS_ALLOW_HTTP", "true")
         force_path_style = os.getenv("DELTA_S3_FORCE_PATH_STYLE", "true")
 
-        if access_key:
-            options["AWS_ACCESS_KEY_ID"] = access_key
-        if secret_key:
-            options["AWS_SECRET_ACCESS_KEY"] = secret_key
-        if region:
-            options["AWS_REGION"] = region
-        if endpoint:
-            options["AWS_ENDPOINT_URL"] = endpoint
-        if allow_http:
-            options["AWS_ALLOW_HTTP"] = allow_http.lower()
+        if aws_access_key_id:
+            options["AWS_ACCESS_KEY_ID"] = aws_access_key_id
+        if aws_secret_access_key:
+            options["AWS_SECRET_ACCESS_KEY"] = aws_secret_access_key
+        if aws_region:
+            options["AWS_REGION"] = aws_region
         if force_path_style:
             options["AWS_S3_ADDRESSING_STYLE"] = (
                 "path" if force_path_style.lower() == "true" else "virtual"
@@ -66,6 +76,7 @@ class MyDeltaSink(BatchingSink):
     def _write_to_db(self, data: list[Any]) -> None:
         if not data:
             return
+        print(f"Writing batch of {len(data)} records to Delta table...")
         arrow_table = self._to_arrow_table(data)
         write_deltalake(
             self.table_uri,
@@ -93,19 +104,11 @@ class MyDeltaSink(BatchingSink):
         raise RuntimeError("Error while writing data to Delta table")
 
 
-def main() -> None:
-    app = Application(
-        consumer_group="cdc-sink-group-delta",
-        auto_create_topics=True,
-        auto_offset_reset="earliest",
-    )
-    delta_sink = MyDeltaSink()
-    input_topic = app.topic(name=os.environ["input"])
-    sdf = app.dataframe(topic=input_topic)
-    sdf = sdf.apply(lambda row: row).print(metadata=True)
-    sdf.sink(delta_sink)
-    app.run()
+delta_sink = MyDeltaSink()
 
+
+# Sink data to S3
+sdf.sink(delta_sink)
 
 if __name__ == "__main__":
-    main()
+    app.run()
