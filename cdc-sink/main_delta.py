@@ -60,17 +60,8 @@ class MyDeltaSink(BatchingSink):
 
         return options
 
-    @staticmethod
-    def _normalize_record(record: Any) -> dict[str, Any]:
-        if isinstance(record, dict):
-            if "after" in record and isinstance(record["after"], dict):
-                return record["after"]
-            return record
-        return {"value": record}
-
     def _to_arrow_table(self, data: list[Any]) -> pa.Table:
-        rows = [self._normalize_record(item) for item in data]
-        payloads = [json.dumps(row, default=str) for row in rows]
+        payloads = [json.dumps(row, default=str) for row in data]
         return pa.table({"payload": payloads})
 
     def _write_to_db(self, data: list[Any]) -> None:
